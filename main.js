@@ -52,9 +52,13 @@
    *  (0,0) is bottom-center of sprite
    */
 const hitTriangle = new PIXI.Polygon([
-   0,  -250,   // nose (LONGER)
-  -70, -65,    // left wing root
-   70, -65     // right wing root
+   0,  -260,   // nose
+  -25, -160,
+  -95, -60,
+  -40, -20,
+   40, -20,
+   95, -60,
+   25, -160
 ]);
 
 

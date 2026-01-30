@@ -39,40 +39,61 @@
   fighter.anchor.set(0.5, 1); // bottom-center
   fighter.x = app.screen.width / 2;
   fighter.y = app.screen.height * 0.8;
+  fighter.gotoAndStop(29);
   app.stage.addChild(fighter);
 
-  fighter.gotoAndStop(29);
-
   // =====================================================
-  // HIT AREA (PIXIJ v8 CORRECT)
+  // HITBOX POLYGONS (SAME POINT COUNT!)
   // =====================================================
 
-  /**
-   * Local coordinates relative to fighter anchor (0.5, 1)
-   *  (0,0) is bottom-center of sprite
-   */
-const hitTriangle = new PIXI.Polygon([
-   0,  -260,   // nose
-  -25, -160,
-  -95, -60,
-  -40, -20,
-   40, -20,
-   95, -60,
-   25, -160
-]);
+  const hitTriangleNormal = new PIXI.Polygon([
+     0,  -260,
+    -25, -160,
+    -95, -60,
+    -40, -20,
+     40, -20,
+     95, -60,
+     25, -160
+  ]);
 
+  const hitTriangleBanked = new PIXI.Polygon([
+     0,  -260,
+    -25, -130,
+    -35, -50,
+    -30, -20,
+     30, -20,
+     35, -50,
+     25, -130
+  ]);
 
-  // LOGIC hit area
-  fighter.hitArea = hitTriangle;
-
-  // DEBUG VISUAL (red triangle)
+  // =====================================================
+  // HITBOX DEBUG
+  // =====================================================
   const hitboxDebug = new PIXI.Graphics();
-  hitboxDebug
-    .beginFill(0xFF0000, 0.50)
-    .drawPolygon(hitTriangle.points)
-    .endFill();
-
   fighter.addChild(hitboxDebug);
+
+  function redrawHitbox(points) {
+    hitboxDebug.clear();
+    hitboxDebug
+      .beginFill(0xff0000, 0.6)
+      .drawPolygon(points)
+      .endFill();
+  }
+
+  // =====================================================
+  // POLYGON INTERPOLATION HELPERS
+  // =====================================================
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function lerpPolygon(polyA, polyB, t) {
+    const result = [];
+    for (let i = 0; i < polyA.points.length; i++) {
+      result[i] = lerp(polyA.points[i], polyB.points[i], t);
+    }
+    return result;
+  }
 
   // =====================================================
   // INPUT
@@ -93,10 +114,8 @@ const hitTriangle = new PIXI.Polygon([
   // MOVEMENT + BANKING CONFIG
   // =====================================================
   const MOVE_SPEED = 15;
-
   const CENTER_FRAME = 29;
   const MAX_BANK_FRAMES = 8;
-  const MIRROR_THRESHOLD = 1.2;
 
   const BANK_IN_SPEED = 0.35;
   const BANK_OUT_SPEED = 0.55;
@@ -114,7 +133,7 @@ const hitTriangle = new PIXI.Polygon([
 
   function createObstacle() {
     const obs = new PIXI.Graphics();
-    obs.beginFill(0xf00000,1);
+    obs.beginFill(0xf00000, 1);
     obs.drawRoundedRect(-25, -25, 50, 50, 8);
     obs.endFill();
 
@@ -127,15 +146,11 @@ const hitTriangle = new PIXI.Polygon([
   }
 
   // =====================================================
-  // COLLISION (POLYGON AWARE)
+  // COLLISION
   // =====================================================
   function polygonHitTest(sprite, obstacle) {
-    // quick reject using bounds
     if (!sprite.getBounds().intersects(obstacle.getBounds())) return false;
-
-    // convert obstacle center into fighter local space
     const localPoint = sprite.toLocal(obstacle.position);
-
     return sprite.hitArea.contains(localPoint.x, localPoint.y);
   }
 
@@ -169,14 +184,10 @@ const hitTriangle = new PIXI.Polygon([
   app.ticker.add((delta) => {
     if (isGameOver) return;
 
-    // --------------------
     // Background
-    // --------------------
     background.tilePosition.y += 5 * delta;
 
-    // --------------------
-    // Fighter movement
-    // --------------------
+    // Movement
     if (keys.left) fighter.x -= MOVE_SPEED * delta;
     if (keys.right) fighter.x += MOVE_SPEED * delta;
 
@@ -185,41 +196,43 @@ const hitTriangle = new PIXI.Polygon([
       Math.min(app.screen.width - fighter.width / 2, fighter.x)
     );
 
-    // --------------------
-    // Banking
-    // --------------------
-    let targetBank = 0;
-    if (keys.left || keys.right) targetBank = MAX_BANK_FRAMES;
+    // Banking logic
+    let targetBank = (keys.left || keys.right) ? MAX_BANK_FRAMES : 0;
+    const speed = targetBank > currentBank ? BANK_IN_SPEED : BANK_OUT_SPEED;
 
-    const speed =
-      targetBank > currentBank ? BANK_IN_SPEED : BANK_OUT_SPEED;
-
-    if (currentBank < targetBank) currentBank += speed * delta;
-    if (currentBank > targetBank) currentBank -= speed * delta;
-
+    currentBank += Math.sign(targetBank - currentBank) * speed * delta;
     currentBank = Math.max(0, Math.min(MAX_BANK_FRAMES, currentBank));
 
     fighter.gotoAndStop(CENTER_FRAME - Math.round(currentBank));
 
     if (keys.right) facing = -1;
     if (keys.left) facing = 1;
+    fighter.scale.x = facing;
 
-    if (currentBank > MIRROR_THRESHOLD) {
-      fighter.scale.x = facing;
-    }
+    // =================================================
+    // HITBOX EASING (THE IMPORTANT PART)
+    // =================================================
+    const bankT = currentBank / MAX_BANK_FRAMES;
 
-    // --------------------
-    // Obstacles spawn
-    // --------------------
+    // ease-in curve (feels better than linear)
+    const easedT = bankT * bankT;
+
+    const blendedPoints = lerpPolygon(
+      hitTriangleNormal,
+      hitTriangleBanked,
+      easedT
+    );
+
+    fighter.hitArea = new PIXI.Polygon(blendedPoints);
+    redrawHitbox(blendedPoints);
+
+    // Obstacles
     spawnTimer += delta;
     if (spawnTimer > SPAWN_INTERVAL) {
       spawnTimer = 0;
       createObstacle();
     }
 
-    // --------------------
-    // Obstacles movement + collision
-    // --------------------
     for (let i = obstacles.length - 1; i >= 0; i--) {
       const obs = obstacles[i];
       obs.y += obs.speed * delta;

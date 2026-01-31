@@ -15,6 +15,9 @@
   // =====================================================
   const sheet = await PIXI.Assets.load('./assets/sprites__.json');
   const space = await PIXI.Assets.load('./assets/space.jpg');
+const missileSheet = await PIXI.Assets.load('./assets/missile-sprite.json');
+
+const missileTexture = missileSheet.textures['missile.png'];
 
   const textures = Object.keys(sheet.textures)
     .sort((a, b) => {
@@ -132,18 +135,29 @@
   let spawnTimer = 0;
 
   function createObstacle() {
-    const obs = new PIXI.Graphics();
-    obs.beginFill(0xf00000, 1);
-    obs.drawRoundedRect(-25, -25, 50, 50, 8);
-    obs.endFill();
+  const obs = new PIXI.Sprite(missileTexture);
 
-    obs.x = Math.random() * app.screen.width;
-    obs.y = -50;
-    obs.speed = OBSTACLE_SPEED;
+  // IMPORTANT: anchor
+  obs.anchor.set(0.5, 0.85); // near engine
 
-    app.stage.addChild(obs);
-    obstacles.push(obs);
-  }
+  // Spawn position
+  obs.x = Math.random() * app.screen.width;
+  obs.y = -100;
+  // Scale if needed
+  obs.scale.set(0.25);
+
+  obs.speed = OBSTACLE_SPEED;
+
+  app.stage.addChild(obs);
+  obstacles.push(obs);
+  const debugDot = new PIXI.Graphics();
+debugDot.beginFill(0x00ff00);
+debugDot.drawCircle(0, 0, 9);
+debugDot.endFill();
+
+obs.addChild(debugDot);
+
+}
 
   // =====================================================
   // COLLISION

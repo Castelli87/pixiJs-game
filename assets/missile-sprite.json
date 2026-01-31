@@ -1,0 +1,20 @@
+{"frames": {
+
+"missile.png":
+{
+	"frame": {"x":1,"y":1,"w":182,"h":551},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":279,"y":95,"w":182,"h":551},
+	"sourceSize": {"w":740,"h":740}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "missile-sprite.png",
+	"format": "RGBA8888",
+	"size": {"w":184,"h":553},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:0cdffe665e381002338a6e4bd635ded5:0532cc2a76b4d831c57beb550ed9e54f:ffba6fc4e900b8a224e41732756216cf$"
+}
+}

@@ -21,8 +21,7 @@ If you collide, a layered explosion plays and the game ends.
 - Dynamic polygon hitbox interpolation
 - Missile spawning system
 - Polygon vs bounds collision detection
-- Explosion spritesheet animation (plays twice on impact)
-- Debug mode for hitbox visualization
+- Explosion spritesheet animation (plays twice on impact) 
 - Clean freeze state on game over
 
 ---
@@ -65,4 +64,5 @@ The repository branches represent different development stages of the project:
 - main → Initial starting point (basic setup)
 - missile → Added missile spawning and collision detection
 - feature/explosion → Collision handling with explosion animation
+
 Each branch shows a progressive step in the development process.

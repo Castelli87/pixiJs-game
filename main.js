@@ -18,6 +18,8 @@
   const space = await PIXI.Assets.load('./assets/space.jpg');
   const missileSheet = await PIXI.Assets.load('./assets/missile-sprite.json');
   const explosionSheet = await PIXI.Assets.load('./assets/sprites-explotion.json');
+  const protectionSheet = await PIXI.Assets.load('./assets/protection.json')
+
 
   const missileTexture = missileSheet.textures['missile.png'];
 
@@ -32,6 +34,10 @@
   const explosionTextures = Object.keys(explosionSheet.textures)
     .sort((a, b) => Number(a) - Number(b))
     .map(key => explosionSheet.textures[key]);
+
+    const protectionTextures = Object.keys(protectionSheet.textures)
+    .sort((a, b) => Number(a) - Number(b))
+    .map(key => protectionSheet.textures[key]);
 
   // =====================================================
   // BACKGROUND
@@ -50,6 +56,34 @@
   fighter.y = app.screen.height * 0.8;
   fighter.gotoAndStop(29);
   app.stage.addChild(fighter);
+
+// =====================================================
+// SHIELD (Protection Ball)
+// =====================================================
+const shield = new PIXI.AnimatedSprite(protectionTextures);
+
+// center the shield on the fighter
+shield.anchor.set(0.5);
+shield.x = 0;
+shield.y = -fighter.height * 0.55; // tweak if needed (puts it around the ship body)
+
+// visuals
+shield.animationSpeed = 0.35;
+shield.loop = true;
+shield.play();
+
+// avoid hiding the fighter
+shield.alpha = 0.65;
+shield.blendMode = PIXI.BLEND_MODES.ADD;
+
+// size (your frames are 640x640 so this is usually needed)
+shield.scale.set(0.60); // tweak to fit your ship
+
+// start hidden until you activate it later
+shield.visible = true; // for now set true to test it renders
+
+// attach to fighter so it moves with it
+fighter.addChild(shield);
 
   // =====================================================
   // HITBOX

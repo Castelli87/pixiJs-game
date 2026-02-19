@@ -1,0 +1,111 @@
+{"frames": {
+
+"Water Ball_Frame_01.png":
+{
+	"frame": {"x":0,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_02.png":
+{
+	"frame": {"x":640,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_03.png":
+{
+	"frame": {"x":1280,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_04.png":
+{
+	"frame": {"x":1920,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_05.png":
+{
+	"frame": {"x":2560,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_06.png":
+{
+	"frame": {"x":3200,"y":0,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_07.png":
+{
+	"frame": {"x":0,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_08.png":
+{
+	"frame": {"x":640,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_09.png":
+{
+	"frame": {"x":1280,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_10.png":
+{
+	"frame": {"x":1920,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_11.png":
+{
+	"frame": {"x":2560,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+},
+"Water Ball_Frame_12.png":
+{
+	"frame": {"x":3200,"y":640,"w":640,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":640},
+	"sourceSize": {"w":640,"h":640}
+}},
+"animations": {
+	"Water Ball_Frame": ["Water Ball_Frame_01.png","Water Ball_Frame_02.png","Water Ball_Frame_03.png","Water Ball_Frame_04.png","Water Ball_Frame_05.png","Water Ball_Frame_06.png","Water Ball_Frame_07.png","Water Ball_Frame_08.png","Water Ball_Frame_09.png","Water Ball_Frame_10.png","Water Ball_Frame_11.png","Water Ball_Frame_12.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "protection.png",
+	"format": "RGBA8888",
+	"size": {"w":3840,"h":1280},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:90cf2e24d1c4f53909549d406464850d:423c412cfe68c8a046631d47703425c2:81c5e558708904c8984a01fda1bb5bcb$"
+}
+}

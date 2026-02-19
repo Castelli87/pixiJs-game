@@ -1,4 +1,5 @@
 (async () => {
+
   // =====================================================
   // APP
   // =====================================================
@@ -15,17 +16,22 @@
   // =====================================================
   const sheet = await PIXI.Assets.load('./assets/sprites__.json');
   const space = await PIXI.Assets.load('./assets/space.jpg');
-const missileSheet = await PIXI.Assets.load('./assets/missile-sprite.json');
+  const missileSheet = await PIXI.Assets.load('./assets/missile-sprite.json');
+  const explosionSheet = await PIXI.Assets.load('./assets/sprites-explotion.json');
 
-const missileTexture = missileSheet.textures['missile.png'];
+  const missileTexture = missileSheet.textures['missile.png'];
 
-  const textures = Object.keys(sheet.textures)
+  const fighterTextures = Object.keys(sheet.textures)
     .sort((a, b) => {
       const na = parseInt(a.match(/\d+/)?.[0] ?? '0', 10);
       const nb = parseInt(b.match(/\d+/)?.[0] ?? '0', 10);
       return na - nb;
     })
-    .map((key) => sheet.textures[key]);
+    .map(key => sheet.textures[key]);
+
+  const explosionTextures = Object.keys(explosionSheet.textures)
+    .sort((a, b) => Number(a) - Number(b))
+    .map(key => explosionSheet.textures[key]);
 
   // =====================================================
   // BACKGROUND
@@ -38,38 +44,37 @@ const missileTexture = missileSheet.textures['missile.png'];
   // =====================================================
   // FIGHTER
   // =====================================================
-  const fighter = new PIXI.AnimatedSprite(textures);
-  fighter.anchor.set(0.5, 1); // bottom-center
+  const fighter = new PIXI.AnimatedSprite(fighterTextures);
+  fighter.anchor.set(0.5, 1);
   fighter.x = app.screen.width / 2;
   fighter.y = app.screen.height * 0.8;
   fighter.gotoAndStop(29);
   app.stage.addChild(fighter);
 
   // =====================================================
-  // HITBOX POLYGONS (SAME POINT COUNT!)
+  // HITBOX
   // =====================================================
-
   const hitTriangleNormal = new PIXI.Polygon([
-     0,  -260,
+     0, -260,
     -25, -160,
-    -95, -60,
-    -40, -20,
-     40, -20,
-     95, -60,
+    -95,  -60,
+    -40,  -20,
+     40,  -20,
+     95,  -60,
      25, -160
   ]);
 
   const hitTriangleBanked = new PIXI.Polygon([
-     0,  -260,
+     0, -260,
     -25, -130,
-    -35, -50,
-    -30, -20,
-     30, -20,
-     35, -50,
+    -35,  -50,
+    -30,  -20,
+     30,  -20,
+     35,  -50,
      25, -130
   ]);
 
-  // =====================================================
+    // =====================================================
   // HITBOX DEBUG
   // =====================================================
   const hitboxDebug = new PIXI.Graphics();
@@ -103,23 +108,22 @@ const missileTexture = missileSheet.textures['missile.png'];
   // =====================================================
   const keys = { left: false, right: false };
 
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     if (e.code === 'ArrowLeft') keys.left = true;
     if (e.code === 'ArrowRight') keys.right = true;
   });
 
-  window.addEventListener('keyup', (e) => {
+  window.addEventListener('keyup', e => {
     if (e.code === 'ArrowLeft') keys.left = false;
     if (e.code === 'ArrowRight') keys.right = false;
   });
 
   // =====================================================
-  // MOVEMENT + BANKING CONFIG
+  // MOVEMENT CONFIG
   // =====================================================
   const MOVE_SPEED = 15;
   const CENTER_FRAME = 29;
   const MAX_BANK_FRAMES = 8;
-
   const BANK_IN_SPEED = 0.35;
   const BANK_OUT_SPEED = 0.55;
 
@@ -135,29 +139,22 @@ const missileTexture = missileSheet.textures['missile.png'];
   let spawnTimer = 0;
 
   function createObstacle() {
-  const obs = new PIXI.Sprite(missileTexture);
+    const obs = new PIXI.Sprite(missileTexture);
+    obs.anchor.set(0.5, 0.85);
+    obs.x = Math.random() * app.screen.width;
+    obs.y = -100;
+    obs.scale.set(0.25);
+    obs.speed = OBSTACLE_SPEED;
 
-  // IMPORTANT: anchor
-  obs.anchor.set(0.5, 0.85); // near engine
-
-  // Spawn position
-  obs.x = Math.random() * app.screen.width;
-  obs.y = -100;
-  // Scale if needed
-  obs.scale.set(0.25);
-
-  obs.speed = OBSTACLE_SPEED;
-
-  app.stage.addChild(obs);
-  obstacles.push(obs);
-  const debugDot = new PIXI.Graphics();
+    app.stage.addChild(obs);
+    obstacles.push(obs);
+    const debugDot = new PIXI.Graphics();
 debugDot.beginFill(0x00ff00);
 debugDot.drawCircle(0, 0, 9);
 debugDot.endFill();
 
 obs.addChild(debugDot);
-
-}
+  }
 
   // =====================================================
   // COLLISION
@@ -169,16 +166,40 @@ obs.addChild(debugDot);
   }
 
   // =====================================================
-  // GAME OVER
+  // EXPLOSION
   // =====================================================
-  let isGameOver = false;
+  let explosionContainer = null;
 
-  function gameOver() {
-    if (isGameOver) return;
-    isGameOver = true;
+function spawnExplosion(x, y) {
 
-    app.ticker.stop();
+  const explosion = new PIXI.AnimatedSprite(explosionTextures);
 
+  explosion.anchor.set(0.5);
+  explosion.position.set(x, y);
+  explosion.scale.set(0.25);
+  explosion.animationSpeed = 0.6;
+  explosion.loop = false;
+  explosion.blendMode = PIXI.BLEND_MODES.ADD;
+
+  let playCount = 0;
+
+  explosion.onComplete = () => {
+    playCount++;
+
+    if (playCount < 2) {
+      explosion.gotoAndPlay(0);
+    } else {
+      explosion.destroy();   // 🔥 remove explosion completely
+      showGameOverText();
+    }
+  };
+
+  app.stage.addChild(explosion);
+  explosion.play();
+}
+
+
+  function showGameOverText() {
     const text = new PIXI.Text('GAME OVER', {
       fontSize: 64,
       fill: 0xffffff,
@@ -188,48 +209,48 @@ obs.addChild(debugDot);
     text.anchor.set(0.5);
     text.x = app.screen.width / 2;
     text.y = app.screen.height / 2;
-
     app.stage.addChild(text);
   }
 
   // =====================================================
+  // GAME STATE
+  // =====================================================
+  let isGameOver = false;
+
+  // =====================================================
   // GAME LOOP
   // =====================================================
-  app.ticker.add((delta) => {
-    if (isGameOver) return;
+ app.ticker.add((delta) => {
 
-    // Background
-    background.tilePosition.y += 5 * delta;
+  if (isGameOver) return;   // NOTHING moves anymore
 
-    // Movement
-    if (keys.left) fighter.x -= MOVE_SPEED * delta;
-    if (keys.right) fighter.x += MOVE_SPEED * delta;
+  // Background
+  background.tilePosition.y += 5 * delta;
 
-    fighter.x = Math.max(
-      fighter.width / 2,
-      Math.min(app.screen.width - fighter.width / 2, fighter.x)
-    );
+  // Fighter movement
+  if (keys.left) fighter.x -= MOVE_SPEED * delta;
+  if (keys.right) fighter.x += MOVE_SPEED * delta;
 
-    // Banking logic
-    let targetBank = (keys.left || keys.right) ? MAX_BANK_FRAMES : 0;
-    const speed = targetBank > currentBank ? BANK_IN_SPEED : BANK_OUT_SPEED;
+  fighter.x = Math.max(
+    fighter.width / 2,
+    Math.min(app.screen.width - fighter.width / 2, fighter.x)
+  );
 
-    currentBank += Math.sign(targetBank - currentBank) * speed * delta;
-    currentBank = Math.max(0, Math.min(MAX_BANK_FRAMES, currentBank));
+  // Banking
+  let targetBank = (keys.left || keys.right) ? MAX_BANK_FRAMES : 0;
+  const speed = targetBank > currentBank ? BANK_IN_SPEED : BANK_OUT_SPEED;
 
-    fighter.gotoAndStop(CENTER_FRAME - Math.round(currentBank));
+  currentBank += Math.sign(targetBank - currentBank) * speed * delta;
+  currentBank = Math.max(0, Math.min(MAX_BANK_FRAMES, currentBank));
 
-    if (keys.right) facing = -1;
-    if (keys.left) facing = 1;
-    fighter.scale.x = facing;
+  fighter.gotoAndStop(CENTER_FRAME - Math.round(currentBank));
 
-    // =================================================
-    // HITBOX EASING (THE IMPORTANT PART)
-    // =================================================
-    const bankT = currentBank / MAX_BANK_FRAMES;
+  if (keys.right) facing = -1;
+  if (keys.left) facing = 1;
+  fighter.scale.x = facing;
 
-    // ease-in curve (feels better than linear)
-    const easedT = bankT * bankT;
+  const bankT = currentBank / MAX_BANK_FRAMES;
+  const easedT = bankT * bankT;
 
     const blendedPoints = lerpPolygon(
       hitTriangleNormal,
@@ -238,30 +259,43 @@ obs.addChild(debugDot);
     );
 
     fighter.hitArea = new PIXI.Polygon(blendedPoints);
-    redrawHitbox(blendedPoints);
+  redrawHitbox(blendedPoints);
+  // Spawn obstacles
+  spawnTimer += delta;
+  if (spawnTimer > SPAWN_INTERVAL) {
+    spawnTimer = 0;
+    createObstacle();
+  }
 
-    // Obstacles
-    spawnTimer += delta;
-    if (spawnTimer > SPAWN_INTERVAL) {
-      spawnTimer = 0;
-      createObstacle();
+  // Update obstacles
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    const obs = obstacles[i];
+    obs.y += obs.speed * delta;
+
+    if (polygonHitTest(fighter, obs)) {
+
+      isGameOver = true;
+
+      const x = fighter.x;
+      const y = fighter.y - 100;
+
+      fighter.destroy();
+
+      obstacles.forEach(o => o.destroy());
+      obstacles.length = 0;
+
+      spawnExplosion(x, y);
+
+      return;
     }
 
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-      const obs = obstacles[i];
-      obs.y += obs.speed * delta;
-
-      if (polygonHitTest(fighter, obs)) {
-        gameOver();
-        return;
-      }
-
-      if (obs.y > app.screen.height + 50) {
-        app.stage.removeChild(obs);
-        obstacles.splice(i, 1);
-      }
+    if (obs.y > app.screen.height + 50) {
+      obs.destroy();
+      obstacles.splice(i, 1);
     }
-  });
+  }
+});
+
 
   // =====================================================
   // RESIZE
@@ -269,7 +303,6 @@ obs.addChild(debugDot);
   window.addEventListener('resize', () => {
     background.width = app.screen.width;
     background.height = app.screen.height;
-    fighter.x = app.screen.width / 2;
-    fighter.y = app.screen.height * 0.8;
   });
+
 })();
